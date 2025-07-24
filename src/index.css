@@ -2,41 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Pulse Zen Tracker Design System - Medical precision meets zen aesthetics */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors */
+    --background: 210 17% 98%;
+    --foreground: 213 27% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 213 27% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 213 27% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Heart rate zone colors */
+    --relaxed: 142 71% 45%;
+    --relaxed-foreground: 0 0% 100%;
+    --relaxed-light: 142 71% 85%;
+    
+    --elevated: 43 96% 56%;
+    --elevated-foreground: 213 27% 15%;
+    --elevated-light: 43 96% 90%;
+    
+    --anxious: 0 84% 60%;
+    --anxious-foreground: 0 0% 100%;
+    --anxious-light: 0 84% 90%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Zen-inspired primary palette */
+    --primary: 213 94% 68%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 213 94% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --secondary: 210 17% 95%;
+    --secondary-foreground: 213 27% 15%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 17% 95%;
+    --muted-foreground: 213 20% 50%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 213 94% 95%;
+    --accent-foreground: 213 94% 68%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 17% 90%;
+    --input: 210 17% 90%;
+    --ring: 213 94% 68%;
 
     --radius: 0.5rem;
+
+    /* Gradients for zen aesthetics */
+    --gradient-relaxed: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 71% 55%));
+    --gradient-elevated: linear-gradient(135deg, hsl(43 96% 56%), hsl(43 96% 66%));
+    --gradient-anxious: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 84% 70%));
+    --gradient-zen: linear-gradient(135deg, hsl(213 94% 68%), hsl(213 94% 78%));
+
+    /* Shadows */
+    --shadow-relaxed: 0 4px 20px hsl(142 71% 45% / 0.3);
+    --shadow-elevated: 0 4px 20px hsl(43 96% 56% / 0.3);
+    --shadow-anxious: 0 4px 20px hsl(0 84% 60% / 0.3);
+    --shadow-zen: 0 8px 32px hsl(213 94% 68% / 0.2);
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +127,53 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Breathing animation for zen guidance */
+  .breathing-orb {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  .pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
+  }
+
+  /* Zone indicator styles */
+  .zone-relaxed {
+    @apply bg-gradient-to-br from-relaxed to-relaxed shadow-relaxed;
+  }
+
+  .zone-elevated {
+    @apply bg-gradient-to-br from-elevated to-elevated shadow-elevated;
+  }
+
+  .zone-anxious {
+    @apply bg-gradient-to-br from-anxious to-anxious shadow-anxious;
+  }
+
+  .zone-zen {
+    @apply bg-gradient-to-br from-primary to-primary shadow-zen;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
   }
 }
