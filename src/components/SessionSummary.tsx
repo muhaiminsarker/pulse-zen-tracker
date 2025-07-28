@@ -24,16 +24,17 @@ export function SessionSummary({ data }: SessionSummaryProps) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const totalTime = data.timeInZones.relaxed + data.timeInZones.elevated + data.timeInZones.anxious;
-  
+  const timeInZones = data.timeInZones || { relaxed: 0, elevated: 0, anxious: 0 };
+  const totalTime = timeInZones.relaxed + timeInZones.elevated + timeInZones.anxious;
+
   const getZonePercentage = (time: number) => {
     return totalTime > 0 ? Math.round((time / totalTime) * 100) : 0;
   };
 
   const generateFeedback = () => {
-    const relaxedPercentage = getZonePercentage(data.timeInZones.relaxed);
-    const anxiousPercentage = getZonePercentage(data.timeInZones.anxious);
-    
+    const relaxedPercentage = getZonePercentage(timeInZones.relaxed);
+    const anxiousPercentage = getZonePercentage(timeInZones.anxious);
+
     if (relaxedPercentage >= 70) {
       return {
         type: "excellent",
@@ -66,7 +67,6 @@ export function SessionSummary({ data }: SessionSummaryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2">
@@ -75,7 +75,7 @@ export function SessionSummary({ data }: SessionSummaryProps) {
             </div>
             <div className="text-2xl font-bold">{formatDuration(data.duration)}</div>
           </div>
-          
+
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2">
               <Heart className="h-4 w-4 text-muted-foreground" />
@@ -83,16 +83,16 @@ export function SessionSummary({ data }: SessionSummaryProps) {
             </div>
             <div className="text-2xl font-bold">{data.averageBpm}</div>
           </div>
-          
+
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2">
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Dominant Zone</span>
             </div>
             <div className="text-lg font-medium">
-              {getZonePercentage(data.timeInZones.relaxed) >= 50 ? (
+              {getZonePercentage(timeInZones.relaxed) >= 50 ? (
                 <Badge className="zone-relaxed text-relaxed-foreground border-0">Relaxed</Badge>
-              ) : getZonePercentage(data.timeInZones.elevated) >= 50 ? (
+              ) : getZonePercentage(timeInZones.elevated) >= 50 ? (
                 <Badge className="zone-elevated text-elevated-foreground border-0">Elevated</Badge>
               ) : (
                 <Badge className="zone-anxious text-anxious-foreground border-0">Anxious</Badge>
@@ -104,52 +104,33 @@ export function SessionSummary({ data }: SessionSummaryProps) {
         {/* Zone Breakdown */}
         <div className="space-y-4">
           <h4 className="font-medium">Time in Heart Rate Zones</h4>
-          
-          <div className="space-y-3">
-            {/* Relaxed Zone */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-relaxed"></div>
-                  <span className="text-sm">Relaxed (&lt;70 BPM)</span>
-                </div>
-                <span className="text-sm font-medium">{getZonePercentage(data.timeInZones.relaxed)}%</span>
-              </div>
-              <Progress value={getZonePercentage(data.timeInZones.relaxed)} className="h-2" />
-            </div>
 
-            {/* Elevated Zone */}
-            <div className="space-y-2">
+          {(['relaxed', 'elevated', 'anxious'] as const).map(zone => (
+            <div className="space-y-2" key={zone}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-elevated"></div>
-                  <span className="text-sm">Elevated (70-90 BPM)</span>
+                  <div className={`w-3 h-3 rounded-full bg-${zone}`}></div>
+                  <span className="text-sm capitalize">
+                    {zone} {zone === 'relaxed' ? '(<70 BPM)' : zone === 'elevated' ? '(70–90 BPM)' : '(>90 BPM)'}
+                  </span>
                 </div>
-                <span className="text-sm font-medium">{getZonePercentage(data.timeInZones.elevated)}%</span>
+                <span className="text-sm font-medium">{getZonePercentage(timeInZones[zone])}%</span>
               </div>
-              <Progress value={getZonePercentage(data.timeInZones.elevated)} className="h-2" />
+              <Progress value={getZonePercentage(timeInZones[zone])} className="h-2" />
             </div>
-
-            {/* Anxious Zone */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-anxious"></div>
-                  <span className="text-sm">Anxious (&gt;90 BPM)</span>
-                </div>
-                <span className="text-sm font-medium">{getZonePercentage(data.timeInZones.anxious)}%</span>
-              </div>
-              <Progress value={getZonePercentage(data.timeInZones.anxious)} className="h-2" />
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Feedback */}
-        <div className={`p-4 rounded-lg border-l-4 ${
-          feedback.type === 'excellent' ? 'bg-relaxed-light border-relaxed' :
-          feedback.type === 'needs-improvement' ? 'bg-anxious-light border-anxious' :
-          'bg-elevated-light border-elevated'
-        }`}>
+        <div
+          className={`p-4 rounded-lg border-l-4 ${
+            feedback.type === 'excellent'
+              ? 'bg-relaxed-light border-relaxed'
+              : feedback.type === 'needs-improvement'
+              ? 'bg-anxious-light border-anxious'
+              : 'bg-elevated-light border-elevated'
+          }`}
+        >
           <div className="flex items-start gap-3">
             <Lightbulb className="h-5 w-5 mt-0.5 text-primary" />
             <div className="space-y-1">

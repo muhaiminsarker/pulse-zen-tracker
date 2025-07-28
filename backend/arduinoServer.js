@@ -65,6 +65,7 @@ parser.on('data', (data) => {
     const bpm = parseInt(data.replace('BPM:', ''));
     if (!isNaN(bpm)) {
       io.emit('bpm', bpm);
+      console.log(`Emitted BPM to UI: ${bpm}`);
     }
   } else {
     console.log('Serial:', data);

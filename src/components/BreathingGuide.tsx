@@ -30,21 +30,23 @@ export function BreathingGuide({ isActive, currentZone }: BreathingGuideProps) {
       return;
     }
 
-    const breathingCycle = () => {
-      setBreathingPhase('inhale');
-      
-      setTimeout(() => {
-        setBreathingPhase('exhale');
-        
-        setTimeout(() => {
-          setCycleCount(prev => prev + 1);
-          breathingCycle();
-        }, timing.exhale);
-      }, timing.inhale);
+    let isInhale = true;
+    let timeout: NodeJS.Timeout;
+
+    const cycle = () => {
+      setBreathingPhase(isInhale ? "inhale" : "exhale");
+      timeout = setTimeout(() => {
+        isInhale = !isInhale;
+        if (!isInhale) setCycleCount((prev) => prev + 1); // count 1 per full cycle
+        cycle(); // flip phase
+      }, isInhale ? timing.inhale : timing.exhale);
     };
 
-    breathingCycle();
+    cycle(); // start breathing
+
+    return () => clearTimeout(timeout); // cleanup
   }, [isActive, timing.inhale, timing.exhale]);
+
 
   const getZoneAdvice = (zone: string) => {
     switch (zone) {

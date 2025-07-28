@@ -1,4 +1,13 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Label,
+} from "recharts";
 
 interface HeartRateData {
   timestamp: number;
@@ -10,29 +19,51 @@ interface HeartRateChartProps {
   currentZone: 'relaxed' | 'elevated' | 'anxious';
 }
 
+const getZoneColor = (zone: string) => {
+  switch (zone) {
+    case "relaxed":
+      return "hsl(var(--relaxed))";
+    case "elevated":
+      return "hsl(var(--elevated))";
+    case "anxious":
+      return "hsl(var(--anxious))";
+    default:
+      return "hsl(var(--primary))";
+  }
+};
+
+const getZone = (bpm: number) => {
+  if (bpm > 85) return "anxious";
+  if (bpm > 70) return "elevated";
+  return "relaxed";
+};
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (!active || !payload || payload.length === 0) return null;
+  const bpm = payload[0].value;
+  const zone = getZone(bpm);
+  const color = getZoneColor(zone);
+  return (
+    <div className="p-2 rounded-md border bg-card shadow-md text-sm space-y-1 min-w-[140px]">
+      <div className="flex justify-between">
+        <span className="text-muted-foreground">Heart Rate</span>
+        <span className="font-semibold">{bpm} BPM</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-muted-foreground">Zone</span>
+        <span className="font-semibold" style={{ color }}>
+          {zone.toUpperCase()}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export function HeartRateChart({ data, currentZone }: HeartRateChartProps) {
-  // Format data for chart
   const chartData = data.map((point, index) => ({
-    time: index,
+    time: index, // seconds since start
     bpm: point.bpm,
   }));
-
-  // Zone color mapping
-  const getZoneColor = (zone: string) => {
-    switch (zone) {
-      case 'relaxed': return 'hsl(var(--relaxed))';
-      case 'elevated': return 'hsl(var(--elevated))';
-      case 'anxious': return 'hsl(var(--anxious))';
-      default: return 'hsl(var(--primary))';
-    }
-  };
-
-  const formatTooltip = (value: any, name: string) => {
-    if (name === 'bpm') {
-      return [`${value} BPM`, 'Heart Rate'];
-    }
-    return [value, name];
-  };
 
   return (
     <div className="h-64">
@@ -40,57 +71,62 @@ export function HeartRateChart({ data, currentZone }: HeartRateChartProps) {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis 
-              dataKey="time" 
+            <XAxis
+              dataKey="time"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <YAxis 
+              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+            >
+              <Label
+                value="Time (s)"
+                offset={-5}
+                position="insideBottom"
+                style={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              />
+            </XAxis>
+            <YAxis
               domain={[50, 120]}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <Tooltip 
-              formatter={formatTooltip}
-              labelStyle={{ color: 'hsl(var(--foreground))' }}
-              contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '6px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-              }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="bpm" 
+              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+            >
+              <Label
+                value="BPM"
+                angle={-90}
+                offset={10}
+                position="insideLeft"
+                style={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              />
+            </YAxis>
+            <Tooltip content={<CustomTooltip />} />
+            <Line
+              type="monotone"
+              dataKey="bpm"
               stroke={getZoneColor(currentZone)}
               strokeWidth={3}
               dot={false}
-              activeDot={{ 
-                r: 6, 
+              activeDot={{
+                r: 6,
                 fill: getZoneColor(currentZone),
-                stroke: 'hsl(var(--background))',
-                strokeWidth: 2
+                stroke: "hsl(var(--background))",
+                strokeWidth: 2,
               }}
             />
-            
             {/* Zone reference lines */}
-            <Line 
-              type="monotone" 
-              dataKey={() => 70} 
-              stroke="hsl(var(--relaxed))" 
-              strokeDasharray="5 5" 
+            <Line
+              type="monotone"
+              dataKey={() => 70}
+              stroke="hsl(var(--relaxed))"
+              strokeDasharray="5 5"
               strokeWidth={1}
               dot={false}
               activeDot={false}
             />
-            <Line 
-              type="monotone" 
-              dataKey={() => 90} 
-              stroke="hsl(var(--elevated))" 
-              strokeDasharray="5 5" 
+            <Line
+              type="monotone"
+              dataKey={() => 90}
+              stroke="hsl(var(--elevated))"
+              strokeDasharray="5 5"
               strokeWidth={1}
               dot={false}
               activeDot={false}
