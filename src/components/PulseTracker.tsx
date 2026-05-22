@@ -46,7 +46,7 @@ export function PulseTracker() {
   const { toast } = useToast();
 
   function getHeartRateZone(bpm: number): HeartRateZone {
-    if (bpm > 85) return "anxious";
+    if (bpm > 90) return "anxious";
     if (bpm > 70) return "elevated";
     return "relaxed";
   }
